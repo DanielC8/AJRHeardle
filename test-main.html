@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Test Main.js Loading</title>
+</head>
+<body>
+    <h1>Testing main.js</h1>
+    <div id="status">Loading...</div>
+    
+    <script>
+        console.log('Test page loaded');
+        
+        // Test if main.js loads without errors
+        window.addEventListener('error', function(e) {
+            document.getElementById('status').innerHTML = 
+                '<div style="color: red;">Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno + '</div>';
+            console.error('Script error:', e);
+        });
+        
+        // Check if app object exists after main.js loads
+        setTimeout(() => {
+            if (typeof app !== 'undefined') {
+                document.getElementById('status').innerHTML = 
+                    '<div style="color: green;">✓ main.js loaded successfully, app object exists</div>';
+            } else {
+                document.getElementById('status').innerHTML = 
+                    '<div style="color: orange;">main.js loaded but no app object found</div>';
+            }
+        }, 1000);
+    </script>
+    
+    <!-- Load main.js -->
+    <script src="main.js"></script>
+</body>
+</html>

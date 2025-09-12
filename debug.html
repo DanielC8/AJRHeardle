@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AJR Heardle - Debug</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #121212; 
+            color: #ffffff; 
+            padding: 20px; 
+        }
+        .error { 
+            background: #ff0000; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        .success { 
+            background: #1d7e05; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+        .info { 
+            background: #444444; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+        }
+    </style>
+</head>
+<body>
+    <h1>AJR Heardle Debug Page</h1>
+    <div id="status">Loading...</div>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        
+        function addStatus(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            statusDiv.appendChild(div);
+        }
+        
+        // Test 1: Check if songs.js loads
+        addStatus('Testing songs.js loading...');
+        
+        // Test 2: Check console errors
+        window.addEventListener('error', function(e) {
+            addStatus('JavaScript Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno, 'error');
+        });
+        
+        // Test 3: Check if songs array exists
+        setTimeout(() => {
+            if (typeof songs !== 'undefined') {
+                addStatus('✓ songs.js loaded successfully. Found ' + songs.length + ' songs', 'success');
+            } else {
+                addStatus('✗ songs.js failed to load or songs array not found', 'error');
+            }
+        }, 1000);
+        
+        // Test 4: Check SoundCloud API
+        addStatus('Testing SoundCloud API access...');
+        const testScript = document.createElement('script');
+        testScript.src = 'https://w.soundcloud.com/player/api.js';
+        testScript.onload = () => addStatus('✓ SoundCloud API accessible', 'success');
+        testScript.onerror = () => addStatus('✗ SoundCloud API blocked or unavailable', 'error');
+        document.head.appendChild(testScript);
+        
+        // Test 5: Check main.js loading
+        addStatus('Testing main.js loading...');
+        setTimeout(() => {
+            if (typeof app !== 'undefined') {
+                addStatus('✓ main.js loaded and app object exists', 'success');
+            } else {
+                addStatus('✗ main.js failed to load or app object not found', 'error');
+            }
+        }, 2000);
+    </script>
+    
+    <!-- Load the actual files to test -->
+    <script defer src="songs.js"></script>
+    <script defer src="main.js"></script>
+</body>
+</html>

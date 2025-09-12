@@ -27,9 +27,10 @@
     <link rel="stylesheet" href="bundle.css" /> -->
     <link rel="stylesheet" href="stylesheet.css" />
     <script defer src="songs.js"></script>
-    <script defer src="main.js"></script>
+    <script defer src="main-fixed.js"></script>
     
-    <!-- delete this bit if you don't want to use Google Analytics -->
+    <!-- Commented out HTTPS redirect for local development -->
+    <!--
     <script>
       if (location.protocol != "https:") {
         location.href =
@@ -37,10 +38,19 @@
           window.location.href.substring(window.location.protocol.length);
       }
     </script>
-    <!-- // delete this bit if you don't want to use Google Analytics -->
+    -->
     
     <meta name="google-site-verification" content="mHvQuygmScMHb5UQzFz7e5gWQ2qAZuze4PcEgFZj_Zg" />
     
   </head>
-  <body></body>
+  <body>
+    <!-- The Svelte app will mount here via main.js -->
+    <noscript>
+      <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif; background-color: #121212; color: #ffffff; min-height: 100vh;">
+        <h1>AJR Heardle</h1>
+        <p>This game requires JavaScript to be enabled in your browser.</p>
+        <p>Please enable JavaScript and refresh the page to play the AJR song guessing game!</p>
+      </div>
+    </noscript>
+  </body>
 </html>
