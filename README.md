@@ -1,4 +1,4 @@
-# [AJR Heardle](https://danielc8.github.io/ajr-heardle/)
+# [AJR Heardle](https://danielc8.github.io/AJRHeardle/)
 
 A daily music guessing game for AJR fans. Listen to the intro of an AJR song and try to guess the title in as few attempts as possible — Wordle-style.
 
