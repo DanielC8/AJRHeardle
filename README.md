@@ -1,52 +1,98 @@
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M2CHKFQ)
-yoinked from:
-# Harry Styles Heardle
+# AJR Heardle
 
-Over 5000 people play this every day!
+A daily music guessing game for AJR fans. Listen to the intro of an AJR song and try to guess the title in as few attempts as possible — Wordle-style.
 
-If you have any questions DM me on Twitter at [@derekahmedzai](https://twitter.com/derekahmedzai).
+## Features
 
-[See all my Heardle clones](https://glitch.com/@derekahmedzai/heardle-clones)
+- **Daily Song Rotation**: A new AJR song is selected each day based on a rotating catalog of songs.
+- **Progressive Audio Reveal**: Each wrong guess unlocks a longer clip (1s, 2s, 4s, 7s, 11s, 16s).
+- **Autocomplete Search**: Type to search through the full AJR discography with duplicate-free suggestions.
+- **Shareable Results**: Copy an emoji grid summary of your game to share with friends.
+- **SoundCloud Playback**: Audio is streamed via the SoundCloud Embed API with a manual fallback if the widget is blocked.
 
-If you have a dead Heardle let me know and I can help you resurrect it.
+## Project Structure
 
-## New faster version!
+```
+index.html        Entry point. Loads styles, song data, and game logic.
+main-fixed.js     Game engine. Handles song selection, playback, guessing, and UI.
+songs.js          Song database. Array of ~2500 AJR tracks with SoundCloud URLs.
+stylesheet.css    Base styles and CSS custom properties for theming.
+```
 
-I updated this recently to avoid long load times. If you remixed this in the past and want to upgrade yours too, read UPGRADE.md
+## How It Works
 
-## Want to create your own Heardle?
+1. **Song Selection** — `getTodaysSong()` calculates the number of days since a configured start date and picks a song by index.
+2. **Audio Playback** — A hidden SoundCloud iframe is embedded. The SoundCloud Widget API controls play/pause and enforces the time limit for the current guess. If the API fails to load, a fallback reveals the iframe for manual control.
+3. **Guessing** — The player types a song name into an input with autocomplete. On submit, the guess is compared (case-insensitive) to the correct answer. Wrong guesses are listed with a red border; a correct guess ends the game with a green border.
+4. **Result Sharing** — Generates an emoji grid (red = wrong, green = correct, white = unused) and copies it to the clipboard or opens the native share dialog.
 
-A few things to know before you start
+## Configuration
 
-- you'll need to be comfortable editing some HTML, Javascript and CSS
-- the songs need to be hosted on Soundcloud and be publicly accessible
-- you'll need a Glitch account (free!) to remix and host yours (or you can download the code and host wherever)
+All configuration lives at the top of `main-fixed.js`:
 
-## How to remix this app
+| Variable | Purpose |
+|---|---|
+| `HEARDLE_GLITCH_NAME` | Glitch project name, used to build the game URL |
+| `HEARDLE_ARTIST` | Artist name displayed in the UI |
+| `HEARDLE_START_DATE` | Date the song rotation begins (format: `YYYY-M-D`) |
+| `HEARDLE_GAME_COMMENTS` | Array of 7 messages shown at game end (index 0 = failed, 1-6 = guesses used) |
 
-1. Register a Glitch account.
-2. Remix this project by clicking the `Remix` button in the header
-3. To change the project title and URL go to Settings > Edit project details. If your project name is `cool-band-heardle` then your url will be `https://cool-band-heardle.glitch.me`
+## Adding / Changing Songs
 
-## Make it your own
+Edit `songs.js`. Each entry follows this format:
 
-1. In the `index.html` file, change every instance of *Harry Styles* to your artist's name. You can find and replace by hitting command+option+F on Mac, or ctrl+F on Windows.
-2. Songs and answers are defined in the `songs.js` file. The songs should go in the order you want the game to go. You can manually enter the songs or if you know how to, you can write a separate script to randomize the tracks and then just copy and paste (see SONGS.md). **Note: These tracks have to follow the format `Artist - Track Title` for it to display correctly in the SoundCloud widget.**
-3. In the `main.js` file, edit the details at the top. This should be enough to customise your game. If there is any other text you'd like to change, search for it and update it. **Important:** If you don't update the game URL then users who copy their results will copy the link to this Heardle instead.
-4. Also in this section is the variable `HEARDLE_START_DATE`. Change this to the current date so that the game starts with the first track in your songs list.
+```js
+{
+  url: "https://soundcloud.com/ajrbrothers/bang",
+  answer: "AJR - Bang!"
+}
+```
 
-Now you're done with all the necessary changes. Congrats! Read on for optional edits.
+Songs rotate in array order. The answer string must match the format `Artist - Track Title` for autocomplete and guess matching to work.
 
-## Optional edits
+To bulk-extract tracks from a SoundCloud artist page, open the browser console on their tracks page and run:
 
-1. If you want to track usage in Google Analytics, sign up for an account and create a property for this website. In the `main.js` file, add your tag id in the `HEARDLE_GOOGLE_ANALYTICS` bit.
-2. If you don't want to use Google Analytics, delete the bit of code that is commented at the bottom of the page.
-3. Go to Assets and upload an image. This'll be your app's icon.
-4. In the `index.html` file, replace every instance of `https://cdn.glitch.global/c60bd441-357c-4ca2-8158-1443c0e5dfbe/favicon.png?v=1681058541048` with your new URL.
-5. In the `bundle.css` file, go to line 788. Here you can change the different accent colors for your game. Simply replace the HEX color codes with ones you want.
+```js
+let songs = [];
+document.querySelectorAll('.soundList__item').forEach(item => {
+  let artist = item.querySelector('.soundTitle__usernameText').innerText;
+  let track = item.querySelector('.soundTitle__title span').innerText;
+  let url = 'https://soundcloud.com' + item.querySelector('a.soundTitle__title').getAttribute('href');
+  songs.push({ url, answer: artist + ' - ' + track });
+});
+JSON.stringify(songs);
+```
 
-## Good luck!
+## Usage
 
-And don't forget to share your custom Heardle!
+This is a static site with no build step or server required.
 
-Reddit, WhatsApp, Facebook and Twitter are good places to share.
+**Local development:**
+
+```
+npx serve .
+```
+
+**Glitch deployment:**
+
+Upload or remix the project on [Glitch](https://glitch.com). The game URL will be `https://<project-name>.glitch.me/`.
+
+## Customizing the Theme
+
+Edit the CSS custom properties in `stylesheet.css`:
+
+```css
+:root {
+  --color-positive: #1d7e05;  /* correct guess / submit button */
+  --color-negative: #ff0000;  /* wrong guess */
+  --color-fg: #ffffff;        /* text */
+  --color-mg: #444444;        /* inactive elements */
+  --color-bg: #121212;        /* page background */
+  --color-line: #888888;      /* borders */
+}
+```
+
+## Requirements
+
+- A modern browser with JavaScript enabled
+- Songs must be publicly accessible on SoundCloud

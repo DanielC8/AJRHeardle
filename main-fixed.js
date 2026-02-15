@@ -171,44 +171,44 @@ function playAudio() {
 function playAudioFallback() {
     const playButton = document.getElementById('play-button');
     const duration = playDurations[currentGuess];
-    
+
     if (isPlaying) {
         isPlaying = false;
         updatePlayButton();
         return;
     }
-    
+
     isPlaying = true;
-    playButton.textContent = `♪ Playing ${duration}s...`;
+    playButton.textContent = `Playing ${duration}s...`;
     playButton.style.background = '#ff8800';
-    
-    // Show the actual SoundCloud player for manual control
+
+    // Reveal the SoundCloud player iframe so the user can interact with it
     const player = document.getElementById('soundcloud-player');
+    const overlay = player ? player.parentElement.querySelector('div[style*="position: absolute"]') : null;
     if (player) {
-        player.style.display = 'block';
-        player.style.opacity = '0.7';
+        player.style.opacity = '1';
+        player.style.pointerEvents = 'auto';
     }
-    
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+
     // Add instruction text
-    const instruction = document.createElement('div');
-    instruction.id = 'audio-instruction';
-    instruction.style.cssText = 'text-align: center; color: #ff8800; font-size: 14px; margin: 10px 0;';
-    instruction.innerHTML = `🎵 Please click play on the SoundCloud player above and stop after ${duration} seconds`;
-    
     const existingInstruction = document.getElementById('audio-instruction');
     if (existingInstruction) {
         existingInstruction.remove();
     }
-    
+
+    const instruction = document.createElement('div');
+    instruction.id = 'audio-instruction';
+    instruction.style.cssText = 'text-align: center; color: #ff8800; font-size: 14px; margin: 10px 0;';
+    instruction.textContent = `Use the SoundCloud player above. Stop after ${duration} seconds.`;
     playButton.parentNode.insertBefore(instruction, playButton.nextSibling);
-    
+
     setTimeout(() => {
         isPlaying = false;
         updatePlayButton();
         if (instruction) instruction.remove();
-        if (player) {
-            player.style.opacity = '1';
-        }
     }, duration * 1000);
 }
 
@@ -355,7 +355,7 @@ function showResult(won) {
 
 // Share result
 function shareResult() {
-    const squares = gameWon ? '🟩'.repeat(currentGuess + 1) + '⬜'.repeat(maxGuesses - currentGuess - 1) 
+    const squares = gameWon ? '🟥'.repeat(currentGuess) + '🟩' + '⬜'.repeat(maxGuesses - currentGuess - 1)
                             : '🟥'.repeat(maxGuesses);
     
     const text = `${HEARDLE_NAME}\n${squares}\n${HEARDLE_URL}`;
@@ -438,12 +438,7 @@ function initGame() {
     
     updateUI();
     createAutocomplete();
-    
-    // Initialize SoundCloud Widget API after a delay
-    setTimeout(() => {
-        initSoundCloudWidget();
-    }, 1000);
-    
+
     // Add enter key support
     document.getElementById('guess-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
@@ -484,6 +479,7 @@ function loadSoundCloudAPI() {
         script.src = 'https://w.soundcloud.com/player/api.js';
         script.onload = () => {
             console.log('SoundCloud API loaded');
+            initSoundCloudWidget();
         };
         script.onerror = () => {
             console.log('SoundCloud API failed to load - using fallback');
@@ -499,9 +495,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.innerHTML = '<div style="text-align: center; padding: 50px; color: red;">Error: Songs not loaded</div>';
         return;
     }
-    
-    loadSoundCloudAPI();
+
+    // Init game first so the player iframe exists, then load the SC API
     initGame();
+    loadSoundCloudAPI();
 });
 
 // Export for debugging
